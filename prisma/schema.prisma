@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+}
+
+model branches {
+  id                      Int                       @id @default(autoincrement())
+  name                    String                    @db.VarChar(255)
+  description             String?                   @db.Text
+  situation               Boolean                   @default(true)
+  cnpj                    String                    @default("000.000.000.000-00") @db.VarChar(50)
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @default(now()) @db.Timestamp(0)
+  what_the_customer_has   what_the_customer_has[]
+  what_the_customer_wants what_the_customer_wants[]
+}
+
+model cities {
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @db.VarChar(120)
+  state_id              Int
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @default(now())
+  states                states                  @relation(fields: [state_id], references: [id], onUpdate: Restrict, map: "cities_ibfk_1")
+  estado                estado[]
+  what_the_customer_has what_the_customer_has[]
+
+  @@index([state_id], map: "state_id")
+}
+
+model customers {
+  id                      Int                       @id @default(autoincrement())
+  user_id                 Int
+  name                    String                    @db.VarChar(255)
+  phone                   String?                   @db.VarChar(50)
+  email                   String                    @unique(map: "email") @db.VarChar(255)
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @default(now())
+  users                   users                     @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "customers_ibfk_1")
+  what_the_customer_has   what_the_customer_has[]
+  what_the_customer_wants what_the_customer_wants[]
+
+  @@index([user_id], map: "user_id")
+}
+
+model estado {
+  id                         Int                     @id @default(autoincrement())
+  what_the_customer_wants_id Int
+  citi_id                    Int                     @default(1)
+  created_at                 DateTime                @default(now())
+  updated_at                 DateTime                @default(now()) @db.Timestamp(0)
+  what_the_customer_wants    what_the_customer_wants @relation(fields: [what_the_customer_wants_id], references: [id], onUpdate: Restrict, map: "estado_ibfk_1")
+  cities                     cities                  @relation(fields: [citi_id], references: [id], onUpdate: Restrict, map: "fk_cities_estado")
+
+  @@index([citi_id], map: "fk_cities_estado")
+  @@index([what_the_customer_wants_id], map: "what_the_customer_wants_id")
+}
+
+model permissions {
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(255)
+  slug              String              @db.VarChar(255)
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @default(now()) @db.Timestamp(0)
+  permissions_users permissions_users[] @ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model permissions_users {
+  user_id       Int
+  permission_id Int
+  users         users       @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "fk_permissions_users_1")
+  permissions   permissions @relation(fields: [permission_id], references: [id], onUpdate: Restrict, map: "fk_permissions_users_2")
+
+  @@index([user_id], map: "fk_permissions_users_1")
+  @@index([permission_id], map: "fk_permissions_users_2")
+  @@ignore
+}
+
+model photographs {
+  id                       Int                   @id @default(autoincrement())
+  what_the_customer_has_id Int
+  url_path                 String                @db.Text
+  situation                Boolean?              @default(true)
+  created_at               DateTime              @default(now())
+  updated_at               DateTime              @default(now()) @db.Timestamp(0)
+  what_the_customer_has    what_the_customer_has @relation(fields: [what_the_customer_has_id], references: [id], onUpdate: Restrict, map: "photographs_ibfk_1")
+
+  @@index([what_the_customer_has_id], map: "what_the_customer_has_id")
+}
+
+model properties {
+  id                      Int                       @id @default(autoincrement())
+  name                    String                    @db.VarChar(120)
+  created_at              DateTime                  @default(now())
+  updated_at              DateTime                  @default(now())
+  what_the_customer_has   what_the_customer_has[]
+  what_the_customer_wants what_the_customer_wants[]
+}
+
+model states {
+  id         Int      @id
+  name       String   @db.VarChar(75)
+  uf         String   @db.VarChar(5)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  cities     cities[]
+}
+
+model users {
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique(map: "email") @db.VarChar(255)
+  password          String              @db.VarChar(255)
+  is_active         users_is_active?    @default(INACTIVE)
+  is_admin          Boolean             @default(false)
+  deleted_at        Int                 @default(0)
+  created_at        DateTime            @default(now())
+  updated_at        DateTime            @default(now())
+  customers         customers[]
+  permissions_users permissions_users[] @ignore
+}
+
+model what_the_customer_has {
+  id                     Int                            @id @default(autoincrement())
+  branche_id             Int                            @default(1)
+  properti_id            Int
+  citie_id               Int
+  customers_id           Int
+  bedrooms               what_the_customer_has_bedrooms
+  total_area             Int
+  useful_area            Int
+  property_initial_value Decimal                        @db.Decimal(10, 2)
+  final_property_value   Decimal                        @db.Decimal(10, 2)
+  branches_id            Int                            @default(1)
+  property_code          String?                        @db.VarChar(50)
+  descriptions           String?                        @default("--") @db.Text
+  created_at             DateTime                       @default(now())
+  updated_at             DateTime                       @default(now())
+  is_active              Int?                           @default(1)
+  photographs            photographs[]
+  properties             properties                     @relation(fields: [properti_id], references: [id], onUpdate: Restrict, map: "what_the_customer_has_ibfk_1")
+  cities                 cities                         @relation(fields: [citie_id], references: [id], onUpdate: Restrict, map: "what_the_customer_has_ibfk_2")
+  customers              customers                      @relation(fields: [customers_id], references: [id], onUpdate: Restrict, map: "what_the_customer_has_ibfk_3")
+  branches               branches                       @relation(fields: [branche_id], references: [id], onUpdate: Restrict, map: "what_the_customer_has_ibfk_4")
+
+  @@index([branche_id], map: "branche_id")
+  @@index([citie_id], map: "citie_id")
+  @@index([customers_id], map: "customers_id")
+  @@index([properti_id], map: "properti_id")
+}
+
+model what_the_customer_wants {
+  id                     Int                              @id @default(autoincrement())
+  branche_id             Int                              @default(1)
+  customers_id           Int
+  properti_id            Int                              @default(1)
+  bedrooms               what_the_customer_wants_bedrooms
+  total_area             Int
+  useful_area            Int
+  property_initial_value Decimal                          @db.Decimal(10, 2)
+  final_property_value   Decimal                          @db.Decimal(10, 2)
+  created_at             DateTime                         @default(now())
+  updated_at             DateTime                         @default(now())
+  is_active              Int?                             @default(1)
+  estado                 estado[]
+  customers              customers                        @relation(fields: [customers_id], references: [id], onUpdate: Restrict, map: "what_the_customer_wants_ibfk_2")
+  properties             properties                       @relation(fields: [properti_id], references: [id], onUpdate: Restrict, map: "what_the_customer_wants_ibfk_3")
+  branches               branches                         @relation(fields: [branche_id], references: [id], onUpdate: Restrict, map: "what_the_customer_wants_ibfk_4")
+
+  @@index([branche_id], map: "branche_id")
+  @@index([customers_id], map: "customers_id")
+  @@index([properti_id], map: "properti_id")
+}
+
+enum users_is_active {
+  ACTIVE
+  INACTIVE
+}
+
+enum what_the_customer_wants_bedrooms {
+  UM
+}
+
+enum what_the_customer_has_bedrooms {
+  UM
+}
+
+model logs {
+  id        Int    @id @default(autoincrement())
+  name_json String? @db.Text
+}
