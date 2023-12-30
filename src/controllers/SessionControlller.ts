@@ -15,10 +15,10 @@ export class SessionControlller {
         }
     }
 
-    static async Register(request: Request<any, any, Prisma.UsersCreateArgs>, response: Response) {
+    static async Register(request: Request<any, any, Prisma.UsersCreateInput>, response: Response) {
         let status: number = 200
         try {
-            const data = request.body.data;
+            const data = request.body;
             const sessionService = await SessionService.Register(data)
             status = sessionService.status
             return response.status(status).json(sessionService)

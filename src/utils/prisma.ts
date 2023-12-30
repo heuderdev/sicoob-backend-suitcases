@@ -1,7 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 
-const prismaDatabase = new PrismaClient();
+const prismaDatabase = new PrismaClient({
+    
+});
 
-prismaDatabase.$disconnect()
+// prismaDatabase.$disconnect()
 
 export { prismaDatabase };

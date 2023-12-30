@@ -3,7 +3,7 @@ declare global {
     namespace Express {
         interface Request {
             user: any
-            io: any          
+            io: any
         }
     }
 }

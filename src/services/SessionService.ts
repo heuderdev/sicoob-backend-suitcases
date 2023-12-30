@@ -8,8 +8,10 @@ import { sign } from "jsonwebtoken";
 export class SessionService {
     static async Login(username: string, password: string) {
         try {
-            const user = await prismaDatabase.users.findFirstOrThrow({ where: { username } })
-
+            await prismaDatabase.$connect()
+            const user = await prismaDatabase.users.findFirstOrThrow({ where: { username }, })
+            console.log(user);
+            
             const passwordMatched = compareSync(password, user?.password);
 
             if (!passwordMatched) {
@@ -40,26 +42,29 @@ export class SessionService {
                 message: error,
                 data: []
             }
+        }finally {
+            await prismaDatabase.$disconnect()
         }
     }
 
     static async Register(data: Prisma.UsersCreateInput) {
         const { username, email, password } = data
-        const object = await validatorObject(RegisterValidation, { username, email, password })
-        console.log(object);
-
+        await validatorObject(RegisterValidation, { username, email, password })
+        
         const salt = genSaltSync(10);
-        const passwordHash = hashSync(password, salt);
-
+        const passwordHash = hashSync(password, salt);        
         try {
+            await prismaDatabase.$connect()
             const createdUser = await prismaDatabase.users.create({
                 data: {
                     username,
                     email,
-                    password: passwordHash
+                    password: passwordHash,
+                    is_active:true
                 }
             })
-
+            console.log(createdUser);
+            
             return {
                 status: 201,
                 error: false,
@@ -73,6 +78,8 @@ export class SessionService {
                 message: "",
                 data: []
             }
+        }finally{
+          await prismaDatabase.$disconnect()
         }
     }
 }
