@@ -5,6 +5,7 @@ import { SuitcaseController } from "../controllers/SuitcaseController";
 import { TypeController } from "../controllers/TypeController";
 import { VolumeController } from "../controllers/VolumeController";
 import { ensureAuthentication } from "../middlewares/ensureAuthentication";
+import { HistoricalController } from "../controllers/HistoricalController";
 
 const routes = Router();
 
@@ -24,5 +25,8 @@ routes.post("/v1/type", ensureAuthentication, TypeController.create)
 
 routes.get("/v1/volume", VolumeController.all)
 routes.post("/v1/volume", ensureAuthentication, VolumeController.create)
+
+routes.get("/v1/historical", HistoricalController.all)
+routes.post("/v1/historical", HistoricalController.create)
 
 export { routes };

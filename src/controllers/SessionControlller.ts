@@ -4,14 +4,15 @@ import { Prisma } from "@prisma/client";
 
 export class SessionControlller {
     static async Login(request: Request, response: Response) {
+        let status = 200
         try {
             const { username, password } = request.body;
 
             const sessionService = await SessionService.Login(username, password)
-
-            return response.status(201).json(sessionService)
+            status = sessionService.status
+            return response.status(status).json(sessionService)
         } catch (error) {
-            return response.status(400).json(error)
+            return response.status(status).json(error)
         }
     }
 
