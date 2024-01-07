@@ -5,7 +5,11 @@ import { TypeCreateValidation } from "./validations/type/TypeCreateValidation";
 
 export class TypesService {
     static async all() {
-        return await prismaDatabase.types.findMany()
+        return await prismaDatabase.types.findMany({
+            orderBy:{
+                name: "asc"
+            }
+        })
     }
 
     static async create(data: Prisma.TypesCreateInput) {

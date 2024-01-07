@@ -6,6 +6,7 @@ import { TypeController } from "../controllers/TypeController";
 import { VolumeController } from "../controllers/VolumeController";
 import { ensureAuthentication } from "../middlewares/ensureAuthentication";
 import { HistoricalController } from "../controllers/HistoricalController";
+import { VerifyTokenController } from "../controllers/VerifyTokenController";
 
 const routes = Router();
 
@@ -24,9 +25,12 @@ routes.get("/v1/type", TypeController.all)
 routes.post("/v1/type", ensureAuthentication, TypeController.create)
 
 routes.get("/v1/volume", VolumeController.all)
+routes.post("/v1/search-custom", VolumeController.searchCustom)
 routes.post("/v1/volume", ensureAuthentication, VolumeController.create)
 
 routes.get("/v1/historical", HistoricalController.all)
 routes.post("/v1/historical", HistoricalController.create)
+
+routes.get("/v1/verify-token", ensureAuthentication, VerifyTokenController.verify)
 
 export { routes };

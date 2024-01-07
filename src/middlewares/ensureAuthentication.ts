@@ -20,7 +20,7 @@ export const ensureAuthentication = async (request: Request, response: Response,
         const data = verify(token, String(process.env.JWT_KEY)) as any
 
         if (data.user) {
-            request.user = JSON.parse(data.user)
+            request.user = JSON.parse(data.user) as any
             return next()
         } else {
             return response.json(401).json({ error: true, message: "JWT inválido." })
